@@ -1,0 +1,29 @@
+---
+- name: web configuration # task's name
+  hosts: all              # ansible inventory all hosts
+  become: yes             # sudo auth
+
+  tasks:
+    - name: git install   # task name
+      yum:                # module
+        name: git
+        state: present    # if not installed, install package. if installed, don't do anything
+    - name: httpd install
+      yum:
+        name: httpd
+        state: present
+    - name: httpd start && enable
+      service:
+        name: httpd
+        state: started    # systemctl start httpd
+        enabled: true     # systemctl enable httpd
+
+- name: vim install
+  hosts: localhost        # do this in this server
+  become: yes             # execute with root auth
+
+  tasks:
+    - name: vim installation
+      yum:
+        name: vim
+        state: present
