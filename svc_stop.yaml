@@ -1,0 +1,8 @@
+---
+# stop server
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: server shutdown
+      command: /sbin/shutdown -h now
