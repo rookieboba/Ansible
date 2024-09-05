@@ -74,3 +74,6 @@ vi /etc/ansible/hosts
 192.168.98.112
 192.168.98.113
 ```
+
+나머지 notion 링크:
+https://rookieboba.notion.site/Ansible-4c6a3ea220ef4c01bddcd2bb4a9c7202
