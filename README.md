@@ -66,3 +66,9 @@ and check to make sure that only the key(s) you wanted were added.
 ## 인벤토리 설정
 
 ### Ansible Inventory 파일 수정
+vi /etc/ansible/hosts
+--- 가장 하단에 아래 내용 추가
+[worker]       #그룹 만들기 
+192.168.98.111  # 연결할 IP 추가
+192.168.98.112
+192.168.98.113
