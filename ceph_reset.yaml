@@ -1,0 +1,80 @@
+---
+- name: Ceph Cluster 초기화
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Ceph 관련 서비스 중지
+      service:
+        name: "{{ item }}"
+        state: stopped
+      with_items:
+        - ceph-osd
+        - ceph-mon
+        - ceph-mds
+        - ceph-rgw
+      ignore_errors: yes
+
+    - name: Ceph 패키지 제거
+      package:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - ceph
+        - ceph-common
+        - ceph-osd
+        - ceph-mon
+        - ceph-mds
+        - ceph-rgw
+        - ceph-fuse
+      ignore_errors: yes
+
+    - name: Ceph 구성 데이터 삭제 (OSD, MON, MDS 등)
+      file:
+        path: "{{ item }}"
+        state: absent
+        recurse: yes
+      with_items:
+        - /var/lib/ceph/osd
+        - /var/lib/ceph/mon
+        - /var/lib/ceph/mds
+        - /var/lib/ceph/radosgw
+        - /etc/ceph
+      ignore_errors: yes
+
+    - name: Ceph 로그 파일 삭제
+      file:
+        path: "/var/log/ceph"
+        state: absent
+        recurse: yes
+      ignore_errors: yes
+
+    - name: Udev rules 파일 삭제
+      file:
+        path: "/etc/udev/rules.d/95-ceph-osd.rules"
+        state: absent
+      ignore_errors: yes
+
+    - name: Ceph 관련 남은 파티션 정리 (OSD 장치 초기화)
+      shell: |
+        ceph-volume lvm zap --destroy --osd-device {{ item }}
+      with_items:
+        - /dev/sdb  # OSD 장치 경로를 여기에 기입
+      ignore_errors: yes
+
+    - name: Ceph 관련된 남은 systemd unit 파일 삭제
+      file:
+        path: "/etc/systemd/system/ceph-{{ item }}@.service"
+        state: absent
+      with_items:
+        - osd
+        - mon
+        - mds
+        - radosgw
+      ignore_errors: yes
+
+    - name: Systemd 데몬 리로드
+      command: systemctl daemon-reload
+
+    - name: 모든 Ceph 관련 서비스 상태 확인
+      service_facts:
